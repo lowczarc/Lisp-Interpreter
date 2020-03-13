@@ -101,8 +101,24 @@ fn main() {
         Slisp::Func(LispFunction(Rc::new(Box::new(functions::sub)))),
     );
     context.insert(
+        String::from("*"),
+        Slisp::Func(LispFunction(Rc::new(Box::new(functions::mul)))),
+    );
+    context.insert(
+        String::from("/"),
+        Slisp::Func(LispFunction(Rc::new(Box::new(functions::div)))),
+    );
+    context.insert(
         String::from("="),
         Slisp::Func(LispFunction(Rc::new(Box::new(functions::equal)))),
+    );
+    context.insert(
+        String::from(">"),
+        Slisp::Func(LispFunction(Rc::new(Box::new(functions::greater)))),
+    );
+    context.insert(
+        String::from("<"),
+        Slisp::Func(LispFunction(Rc::new(Box::new(functions::lower)))),
     );
     context.insert(
         String::from("if"),

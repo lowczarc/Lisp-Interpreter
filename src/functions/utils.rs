@@ -5,16 +5,19 @@ pub fn if_else(context: &mut Context, args: Vec<LispFunction>) -> Slisp {
         panic!("Wrong number of arguments in if");
     }
 
-    match args[0].0(context, Vec::new()) {
+    let val = args[0].0(context, Vec::new());
+    let ret_value = match get_value(&context, val) {
         Slisp::Numeric(0) | Slisp::None => {
             if let Some(f_else) = args.get(2) {
-                return f_else.0(context, Vec::new());
+                f_else.0(context, Vec::new())
+            } else {
+                Slisp::None
             }
         }
-        _ => return args[1].0(context, Vec::new()),
-    }
+        _ => args[1].0(context, Vec::new()),
+    };
 
-    Slisp::None
+    get_value(&context, ret_value)
 }
 
 pub fn print(context: &mut Context, args: Vec<LispFunction>) -> Slisp {
