@@ -62,7 +62,7 @@ fn eval(context: &mut Context, program: Vec<LispStruct>) -> Slisp {
                 if let Ok(x) = s.parse::<i32>() {
                     Slisp::Numeric(x).into()
                 } else {
-                    Slisp::String(s.to_string()).into()
+                    Slisp::Literal(s.to_string()).into()
                 }
             }
         })
@@ -74,7 +74,6 @@ fn eval(context: &mut Context, program: Vec<LispStruct>) -> Slisp {
         } else {
             panic!(format!("No function named {} in the context", name));
         };
-
 
         context.insert(name, Slisp::Func(LispFunction(function.clone())));
 

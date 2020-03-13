@@ -6,10 +6,10 @@ pub fn lambda(context: &mut Context, mut args: Vec<LispFunction>) -> Slisp {
         panic!("Wrong number of arguments in lambda definition");
     }
 
-    let lambda_var = if let Slisp::String(s) = args[0].0(context, Vec::new()) {
+    let lambda_var = if let Slisp::Literal(s) = args[0].0(context, Vec::new()) {
         s
     } else {
-        panic!("Wrong Type in Lambda var")
+        panic!("Lambda var must be a literal")
     };
     let func_def = args.remove(1);
 
@@ -18,13 +18,8 @@ pub fn lambda(context: &mut Context, mut args: Vec<LispFunction>) -> Slisp {
             if args.len() < 1 {
                 panic!("Wrong number of arguments in lambda call");
             }
-            let mut arg = args.remove(0).0(context, Vec::new());
-
-            if let Slisp::String(s) = &arg {
-                if let Some(v) = context.get(s) {
-                    arg = v.clone();
-                }
-            }
+            let arg = args.remove(0).0(context, Vec::new());
+            let arg = get_value(&context, arg);
 
             let tmp = context.remove(&lambda_var);
             context.insert(lambda_var.clone(), arg);

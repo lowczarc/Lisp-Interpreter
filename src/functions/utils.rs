@@ -19,19 +19,8 @@ pub fn if_else(context: &mut Context, args: Vec<LispFunction>) -> Slisp {
 
 pub fn print(context: &mut Context, args: Vec<LispFunction>) -> Slisp {
     for arg in args.iter() {
-        match arg.0(context, Vec::new()) {
-            Slisp::Numeric(x) => {
-                print!("{}", x);
-            }
-            Slisp::String(s) => {
-                if let Some(Slisp::Numeric(x)) = context.get(&s) {
-                    print!("{}", x);
-                } else {
-                    print!("{}", s);
-                }
-            }
-            _ => {}
-        }
+        let value = arg.0(context, Vec::new());
+        print!("{}", get_value(&context, value));
     }
 
     println!("");

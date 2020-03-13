@@ -5,7 +5,7 @@ pub fn def(context: &mut Context, mut args: Vec<LispFunction>) -> Slisp {
         panic!("Wrong number of arguments in var definition");
     }
 
-    let name_var = if let Slisp::String(s) = args[0].0(context, Vec::new()) {
+    let name_var = if let Slisp::Literal(s) = args[0].0(context, Vec::new()) {
         s
     } else {
         panic!("Wrong Type in Name var")

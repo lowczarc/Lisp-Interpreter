@@ -9,7 +9,7 @@ pub struct LispFunction(pub Rc<Box<dyn Fn(&mut Context, Vec<LispFunction>) -> Sl
 pub enum Slisp {
     Func(LispFunction),
     Numeric(i32),
-    String(String),
+    Literal(String),
     None,
 }
 
@@ -20,13 +20,25 @@ impl From<Slisp> for LispFunction {
             Slisp::Numeric(x) => LispFunction(Rc::new(Box::new(
                 move |_context: &mut Context, _args: Vec<LispFunction>| Slisp::Numeric(x),
             ))),
-            Slisp::String(s) => LispFunction(Rc::new(Box::new(
-                move |_context: &mut Context, _args: Vec<LispFunction>| Slisp::String(s.clone()),
+            Slisp::Literal(s) => LispFunction(Rc::new(Box::new(
+                move |_context: &mut Context, _args: Vec<LispFunction>| Slisp::Literal(s.clone()),
             ))),
             Slisp::None => LispFunction(Rc::new(Box::new(
                 |_context: &mut Context, _args: Vec<LispFunction>| Slisp::None,
             ))),
         }
+    }
+}
+
+pub fn get_value(context: &Context, literal: Slisp) -> Slisp {
+    if let Slisp::Literal(s) = literal {
+        if let Some(value) = context.get(&s) {
+            value.clone()
+        } else {
+            Slisp::None
+        }
+    } else {
+        literal
     }
 }
 
@@ -41,7 +53,7 @@ impl fmt::Debug for Slisp {
         match self {
             Slisp::Func(_) => f.write_str("Slisp::Func(#Func#)"),
             Slisp::Numeric(n) => f.write_str(&format!("Slisp::Numeric({})", n)),
-            Slisp::String(s) => f.write_str(&format!("Slisp::String({})", s)),
+            Slisp::Literal(s) => f.write_str(&format!("Slisp::Literal({})", s)),
             Slisp::None => f.write_str("Slisp::None"),
         }
     }
@@ -50,10 +62,10 @@ impl fmt::Debug for Slisp {
 impl fmt::Display for Slisp {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            Slisp::Func(_) => panic!("Can't format properly a function"),
+            Slisp::Func(_) => f.write_str(&format!("#Func#")),
             Slisp::Numeric(n) => f.write_str(&format!("{}", n)),
-            Slisp::String(s) => f.write_str(&format!("{}", s)),
-            Slisp::None => panic!("Can't format nil"),
+            Slisp::Literal(s) => f.write_str(&format!("{}", s)),
+            Slisp::None => f.write_str(&format!("#None#")),
         }
     }
 }

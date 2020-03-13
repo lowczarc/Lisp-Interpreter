@@ -1,9 +1,9 @@
 (def iter
      (λ n
         (λ f
-           (if (= n 0)
-             (f 0)
-             (+ (iter (- n 1) f) (f n))))))
+           (if (= n 1)
+             (if (f 0) 1 1)
+             (+ (iter (- n 1) f) (if (f (- n 1)) 1 1))))))
 
 (def fibo
      (λ n
@@ -13,4 +13,4 @@
             1
             (+ (fibo (- n 1)) (fibo (- n 2)))))))
 
-(iter 15 (λ n (print (fibo n))))
+(iter 15 (λ n (print(fibo n))))
