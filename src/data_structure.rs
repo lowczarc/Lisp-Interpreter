@@ -1,8 +1,11 @@
-use std::{collections::HashMap, fmt};
+use std::{collections::HashMap, fmt, rc::Rc};
 
 pub type Context = HashMap<String, Slisp>;
-pub struct LispFunction(pub Box<dyn Fn(&mut Context, Vec<LispFunction>) -> Slisp>);
 
+#[derive(Clone)]
+pub struct LispFunction(pub Rc<Box<dyn Fn(&mut Context, Vec<LispFunction>) -> Slisp>>);
+
+#[derive(Clone)]
 pub enum Slisp {
     Func(LispFunction),
     Numeric(i32),
@@ -14,15 +17,15 @@ impl From<Slisp> for LispFunction {
     fn from(value: Slisp) -> Self {
         match value {
             Slisp::Func(function) => function,
-            Slisp::Numeric(x) => LispFunction(Box::new(
+            Slisp::Numeric(x) => LispFunction(Rc::new(Box::new(
                 move |_context: &mut Context, _args: Vec<LispFunction>| Slisp::Numeric(x),
-            )),
-            Slisp::String(s) => LispFunction(Box::new(
+            ))),
+            Slisp::String(s) => LispFunction(Rc::new(Box::new(
                 move |_context: &mut Context, _args: Vec<LispFunction>| Slisp::String(s.clone()),
-            )),
-            Slisp::None => LispFunction(Box::new(
+            ))),
+            Slisp::None => LispFunction(Rc::new(Box::new(
                 |_context: &mut Context, _args: Vec<LispFunction>| Slisp::None,
-            )),
+            ))),
         }
     }
 }

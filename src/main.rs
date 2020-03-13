@@ -1,4 +1,4 @@
-use std::{env::args, collections::HashMap, str::Chars};
+use std::{collections::HashMap, env::args, rc::Rc, str::Chars};
 
 mod data_structure;
 mod functions;
@@ -53,11 +53,11 @@ fn eval(context: &mut Context, program: Vec<LispStruct>) -> Slisp {
 
     let arguments: Vec<LispFunction> = args
         .map(|elem| match elem {
-            LispStruct::Struct(subelem) => LispFunction(Box::new(
+            LispStruct::Struct(subelem) => LispFunction(Rc::new(Box::new(
                 move |context: &mut Context, _args: Vec<LispFunction>| {
                     eval(context, subelem.to_vec())
                 },
-            )),
+            ))),
             LispStruct::String(s) => {
                 if let Ok(x) = s.parse::<i32>() {
                     Slisp::Numeric(x).into()
@@ -75,15 +75,10 @@ fn eval(context: &mut Context, program: Vec<LispStruct>) -> Slisp {
             panic!(format!("No function named {} in the context", name));
         };
 
-        let ptr = Box::into_raw(function);
-        let tmp = unsafe { Box::from_raw(ptr) }; // TODO: Find a way to remove theses unsafes (maybe with a Rc)
-        let function = ptr;
 
-        context.insert(name, Slisp::Func(LispFunction(tmp)));
+        context.insert(name, Slisp::Func(LispFunction(function.clone())));
 
-        let result = unsafe { (*function)(context, arguments) };
-
-        result
+        function(context, arguments)
     } else if let Some(LispStruct::Struct(subelem)) = function_name {
         if let Slisp::Func(f) = eval(context, subelem.to_vec()) {
             f.0(context, arguments)
@@ -100,31 +95,31 @@ fn main() {
 
     context.insert(
         String::from("+"),
-        Slisp::Func(LispFunction(Box::new(functions::add))),
+        Slisp::Func(LispFunction(Rc::new(Box::new(functions::add)))),
     );
     context.insert(
         String::from("-"),
-        Slisp::Func(LispFunction(Box::new(functions::sub))),
+        Slisp::Func(LispFunction(Rc::new(Box::new(functions::sub)))),
     );
     context.insert(
         String::from("="),
-        Slisp::Func(LispFunction(Box::new(functions::equal))),
+        Slisp::Func(LispFunction(Rc::new(Box::new(functions::equal)))),
     );
     context.insert(
         String::from("if"),
-        Slisp::Func(LispFunction(Box::new(functions::if_else))),
+        Slisp::Func(LispFunction(Rc::new(Box::new(functions::if_else)))),
     );
     context.insert(
         String::from("print"),
-        Slisp::Func(LispFunction(Box::new(functions::print))),
+        Slisp::Func(LispFunction(Rc::new(Box::new(functions::print)))),
     );
     context.insert(
         String::from("λ"),
-        Slisp::Func(LispFunction(Box::new(functions::lambda))),
+        Slisp::Func(LispFunction(Rc::new(Box::new(functions::lambda)))),
     );
     context.insert(
         String::from("def"),
-        Slisp::Func(LispFunction(Box::new(functions::def))),
+        Slisp::Func(LispFunction(Rc::new(Box::new(functions::def)))),
     );
 
     let first_arg = if let Some(arg) = args().skip(1).next() {
