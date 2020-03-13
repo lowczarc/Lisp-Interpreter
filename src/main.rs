@@ -25,6 +25,10 @@ fn parse_func(program: &mut Chars) -> Vec<LispStruct> {
                 }
             }
             ('(', false) => {
+                if current_arg.len() != 0 {
+                    args.push(LispStruct::String(current_arg));
+                    current_arg = String::new();
+                }
                 args.push(LispStruct::Struct(Box::new(parse_func(program))));
             }
             (')', false) => {
