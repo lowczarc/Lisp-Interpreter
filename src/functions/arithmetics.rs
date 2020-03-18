@@ -137,9 +137,7 @@ pub fn div(context: &mut Context, args: Vec<LispFunction>) -> Slisp {
     let arg2 = get_value(&context, arg2);
 
     match (arg1, arg2) {
-        (Slisp::Numeric(x1), Slisp::Numeric(x2)) => {
-            Slisp::Numeric(x1 / x2)
-        }
+        (Slisp::Numeric(x1), Slisp::Numeric(x2)) => Slisp::Numeric(x1 / x2),
         _ => {
             panic!("div: expected two values of type Numeric");
         }

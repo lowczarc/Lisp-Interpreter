@@ -129,6 +129,26 @@ fn main() {
         Slisp::Func(LispFunction(Rc::new(Box::new(functions::print)))),
     );
     context.insert(
+        String::from("list"),
+        Slisp::Func(LispFunction(Rc::new(Box::new(functions::list)))),
+    );
+    context.insert(
+        String::from("len"),
+        Slisp::Func(LispFunction(Rc::new(Box::new(functions::len)))),
+    );
+    context.insert(
+        String::from("last"),
+        Slisp::Func(LispFunction(Rc::new(Box::new(functions::last)))),
+    );
+    context.insert(
+        String::from("push"),
+        Slisp::Func(LispFunction(Rc::new(Box::new(functions::push)))),
+    );
+    context.insert(
+        String::from("pop"),
+        Slisp::Func(LispFunction(Rc::new(Box::new(functions::pop)))),
+    );
+    context.insert(
         String::from("λ"),
         Slisp::Func(LispFunction(Rc::new(Box::new(functions::lambda)))),
     );
@@ -136,6 +156,8 @@ fn main() {
         String::from("def"),
         Slisp::Func(LispFunction(Rc::new(Box::new(functions::def)))),
     );
+
+    context.insert(String::from("nil"), Slisp::None);
 
     let first_arg = if let Some(arg) = args().skip(1).next() {
         arg.to_string()

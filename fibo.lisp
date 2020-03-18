@@ -1,21 +1,22 @@
-(def iter
-     (λ n
-        (λ f
-           (if (< n 1)
-             0
-             (+ (iter (- n 1) f) (if (f (- n 1)) 1 1))))))
-
 (def fibo
      (λ n
         (if (< n 2)
           n
           (+ (fibo (- n 1)) (fibo (- n 2))))))
 
-(def fac
-     (λ n
-        (if (< n 1)
-          1
-          (* n (fac (- n 1))))))
+(def range
+     (λ min
+        (λ max
+           (if (= min max)
+             (list)
+             (push (range min (- max 1)) (- max 1))))))
 
-(iter 15 (λ n (print (fibo n))))
-(iter 15 (λ n (print (fac n))))
+(def map
+     (λ l
+        (λ f
+           (if (= (len l) 0)
+             (list)
+             (push (map (pop l) f)
+                   (f (last l)))))))
+
+(map (range 0 30) (λ n (print (fibo n))))

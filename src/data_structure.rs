@@ -10,6 +10,7 @@ pub enum Slisp {
     Func(LispFunction),
     Numeric(i32),
     Literal(String),
+    List(Vec<Slisp>),
     None,
 }
 
@@ -22,6 +23,9 @@ impl From<Slisp> for LispFunction {
             ))),
             Slisp::Literal(s) => LispFunction(Rc::new(Box::new(
                 move |_context: &mut Context, _args: Vec<LispFunction>| Slisp::Literal(s.clone()),
+            ))),
+            Slisp::List(v) => LispFunction(Rc::new(Box::new(
+                move |_context: &mut Context, _args: Vec<LispFunction>| Slisp::List(v.clone()),
             ))),
             Slisp::None => LispFunction(Rc::new(Box::new(
                 |_context: &mut Context, _args: Vec<LispFunction>| Slisp::None,
@@ -54,6 +58,7 @@ impl fmt::Debug for Slisp {
             Slisp::Func(_) => f.write_str("Slisp::Func(#Func#)"),
             Slisp::Numeric(n) => f.write_str(&format!("Slisp::Numeric({})", n)),
             Slisp::Literal(s) => f.write_str(&format!("Slisp::Literal({})", s)),
+            Slisp::List(v) => f.write_str(&format!("Slisp::List({:?})", v)),
             Slisp::None => f.write_str("Slisp::None"),
         }
     }
@@ -65,6 +70,7 @@ impl fmt::Display for Slisp {
             Slisp::Func(_) => f.write_str(&format!("#Func#")),
             Slisp::Numeric(n) => f.write_str(&format!("{}", n)),
             Slisp::Literal(s) => f.write_str(&format!("{}", s)),
+            Slisp::List(_) => f.write_str(&format!("#List#")),
             Slisp::None => f.write_str(&format!("#None#")),
         }
     }
