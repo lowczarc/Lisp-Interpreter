@@ -21,12 +21,12 @@ pub fn if_else(context: &mut Context, args: Vec<LispFunction>) -> Slisp {
 }
 
 pub fn print(context: &mut Context, args: Vec<LispFunction>) -> Slisp {
-    for arg in args.iter() {
+    let ret = args.iter().map(|arg| {
         let value = arg.0(context, Vec::new());
-        print!("{}", get_value(&context, value));
-    }
+        format!("{}", get_value(&context, value))
+    }).collect::<Vec<String>>().join(" ");
 
-    println!("");
+    println!("{}", ret);
 
     Slisp::None
 }
