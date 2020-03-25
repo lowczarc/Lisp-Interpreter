@@ -5,7 +5,7 @@ mod functions;
 
 use data_structure::*;
 
-fn parse_func(program: &mut Chars) -> Vec<LispStruct> {
+fn parse_lisp(program: &mut Chars) -> Vec<Slisp> {
     let mut current_arg = String::new();
     let mut args = Vec::new();
     let mut quote = false;
@@ -20,20 +20,20 @@ fn parse_func(program: &mut Chars) -> Vec<LispStruct> {
             }
             (' ', false) | ('\n', false) | ('\t', false) => {
                 if current_arg.len() != 0 {
-                    args.push(LispStruct::String(current_arg));
+                    args.push(Slisp::Atom(current_arg));
                     current_arg = String::new();
                 }
             }
             ('(', false) => {
                 if current_arg.len() != 0 {
-                    args.push(LispStruct::String(current_arg));
+                    args.push(Slisp::Atom(current_arg));
                     current_arg = String::new();
                 }
-                args.push(LispStruct::Struct(Box::new(parse_func(program))));
+                args.push(Slisp::List(parse_lisp(program)));
             }
             (')', false) => {
                 if current_arg.len() != 0 {
-                    args.push(LispStruct::String(current_arg));
+                    args.push(Slisp::Atom(current_arg));
                 }
 
                 break;
@@ -45,48 +45,6 @@ fn parse_func(program: &mut Chars) -> Vec<LispStruct> {
     }
 
     return args;
-}
-
-fn eval(context: &mut Context, program: Vec<LispStruct>) -> Slisp {
-    let mut args = program.into_iter();
-    let function_name = args.next();
-
-    let arguments: Vec<LispFunction> = args
-        .map(|elem| match elem {
-            LispStruct::Struct(subelem) => LispFunction(Rc::new(Box::new(
-                move |context: &mut Context, _args: Vec<LispFunction>| {
-                    eval(context, subelem.to_vec())
-                },
-            ))),
-            LispStruct::String(s) => {
-                if let Ok(x) = s.parse::<i32>() {
-                    Slisp::Numeric(x).into()
-                } else {
-                    Slisp::Literal(s.to_string()).into()
-                }
-            }
-        })
-        .collect();
-
-    if let Some(LispStruct::String(name)) = function_name {
-        let function = if let Some(Slisp::Func(function)) = context.remove(&name.to_string()) {
-            function.0
-        } else {
-            panic!(format!("No function named {} in the context", name));
-        };
-
-        context.insert(name, Slisp::Func(LispFunction(function.clone())));
-
-        function(context, arguments)
-    } else if let Some(LispStruct::Struct(subelem)) = function_name {
-        if let Slisp::Func(f) = eval(context, subelem.to_vec()) {
-            f.0(context, arguments)
-        } else {
-            panic!("Only names and function are callables");
-        }
-    } else {
-        panic!("Empty function call");
-    }
 }
 
 fn main() {
@@ -167,10 +125,10 @@ fn main() {
 
     let mut chars = first_arg.chars();
 
-    let program_struct = parse_func(&mut chars);
+    let program_struct = parse_lisp(&mut chars);
     for func in program_struct.into_iter() {
-        if let LispStruct::Struct(func) = func {
-            eval(&mut context, func.to_vec());
+        if let Slisp::List(func) = func {
+            functions::eval(&mut context, func.to_vec());
         }
     }
 }

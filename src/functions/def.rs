@@ -1,17 +1,19 @@
 use crate::data_structure::*;
 
-pub fn def(context: &mut Context, mut args: Vec<LispFunction>) -> Slisp {
-    if args.len() < 2 {
-        panic!("Wrong number of arguments in var definition");
-    }
+pub fn def(context: &mut Context, args: Vec<Slisp>) -> Slisp {
+    let mut arguments = args.into_iter();
 
-    let name_var = if let Slisp::Literal(s) = args[0].0(context, Vec::new()) {
-        s
-    } else {
-        panic!("Wrong Type in Name var")
-    };
+    let name_var =
+        if let Slisp::Atom(s) = arguments.next().expect("Wrong number of argument in def") {
+            s
+        } else {
+            panic!("Wrong Type in Name var")
+        };
 
-    let var = args.remove(1).0(context, Vec::new());
+    let var = get_value(
+        context,
+        arguments.next().expect("Wrong number of arguments in def"),
+    );
 
     context.insert(name_var, var);
 

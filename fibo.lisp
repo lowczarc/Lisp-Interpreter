@@ -1,3 +1,9 @@
+(def ifibo
+     (λ n
+        (if (= n 1)
+          (list 0 1)
+          ((λ l (push l (+ (last l) (last (pop l))))) (ifibo (- n 1))))))
+
 (def fibo
      (λ n
         (if (< n 2)
@@ -19,4 +25,26 @@
              (push (map (pop l) f)
                    (f (last l)))))))
 
-(map (range 0 30) (λ n (print (fibo n))))
+(def remove
+     (λ l
+        (λ i
+           (if (= (len l) (+ i 1))
+             (pop l)
+             (if (= (len l) 0)
+               (list)
+               (push (remove (pop l) i) (last l)))))))
+
+(def merge
+     (λ l1
+        (λ l2
+           (if (= (len l2) 0)
+             l1
+             (push (merge l1 (pop l2)) (last l2))))))
+
+(def rev
+     (λ l
+        (if (= (len l) 0)
+          (list)
+          (merge (list (last l)) (rev (pop l))))))
+
+(map (range 1 47) (λ n (print (ifibo n))))
