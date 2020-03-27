@@ -150,6 +150,13 @@ mod wasm {
     pub extern "C" fn execute_bytes_array(ptr: *const u8, len: usize) {
         let input = unsafe { std::slice::from_raw_parts(ptr, len) };
     
+        std::panic::set_hook(Box::new(|panic_info| {
+            if let Some(message) = panic_info.payload().downcast_ref::<String>() {
+                console_log(&format!("Panic occurred: {}", &message));
+            } else if let Some(message) = panic_info.payload().downcast_ref::<&str>() {
+                console_log(&format!("Panic occurred: {}", &message));
+            }
+        }));
         execute(
             String::from_utf8(input.to_vec())
                 .expect("execute_bytes_array: Input must be a valid UTF-8 value"),
