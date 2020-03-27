@@ -1,4 +1,4 @@
-use std::{collections::HashMap, env::args, rc::Rc, str::Chars};
+use std::{collections::HashMap, rc::Rc, str::Chars};
 
 mod data_structure;
 mod functions;
@@ -47,7 +47,7 @@ fn parse_lisp(program: &mut Chars) -> Vec<Slisp> {
     return args;
 }
 
-fn main() {
+pub fn execute(program: String) {
     let mut context = HashMap::new();
 
     context.insert(
@@ -117,18 +117,53 @@ fn main() {
 
     context.insert(String::from("nil"), Slisp::None);
 
-    let first_arg = if let Some(arg) = args().skip(1).next() {
-        arg.to_string()
-    } else {
-        panic!("Need an argument");
-    };
-
-    let mut chars = first_arg.chars();
+    let mut chars = program.chars();
 
     let program_struct = parse_lisp(&mut chars);
+
     for func in program_struct.into_iter() {
         if let Slisp::List(func) = func {
             functions::eval(&mut context, func.to_vec());
         }
     }
 }
+
+#[cfg(target_arch = "wasm32")]
+mod wasm {
+    use super::*;
+
+    #[link(wasm_import_module = "imports")]
+    extern "C" {
+        fn log_str(log: *const u8);
+    }
+
+    pub fn console_log(log: &str) {
+        let mut zero_terminated_vec: Vec<u8> = log.as_bytes().into();
+
+        zero_terminated_vec.push(0);
+        unsafe {
+            log_str(zero_terminated_vec.as_ptr());
+        }
+    }
+
+    #[no_mangle]
+    pub extern "C" fn execute_bytes_array(ptr: *const u8, len: usize) {
+        let input = unsafe { std::slice::from_raw_parts(ptr, len) };
+    
+        execute(
+            String::from_utf8(input.to_vec())
+                .expect("execute_bytes_array: Input must be a valid UTF-8 value"),
+        );
+    }
+    
+    #[no_mangle]
+    pub extern "C" fn allocateUint8Array(len: usize) -> *const u8 {
+        let buffer = Vec::with_capacity(len);
+        let ptr = buffer.as_ptr();
+    
+        std::mem::forget(buffer);
+    
+        ptr
+    }
+}
+

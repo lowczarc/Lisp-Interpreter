@@ -19,6 +19,7 @@ pub fn if_else(context: &mut Context, args: Vec<Slisp>) -> Slisp {
     }
 }
 
+#[cfg(not(target_arch = "wasm32"))]
 pub fn print(context: &mut Context, args: Vec<Slisp>) -> Slisp {
     let ret = args
         .into_iter()
@@ -27,6 +28,21 @@ pub fn print(context: &mut Context, args: Vec<Slisp>) -> Slisp {
         .join(" ");
 
     println!("{}", ret);
+
+    Slisp::None
+}
+
+#[cfg(target_arch = "wasm32")]
+pub fn print(context: &mut Context, args: Vec<Slisp>) -> Slisp {
+    use crate::wasm::console_log;
+
+    let ret = args
+        .into_iter()
+        .map(|arg| format!("{}", get_value(context, arg)))
+        .collect::<Vec<String>>()
+        .join(" ");
+
+    console_log(&ret);
 
     Slisp::None
 }
