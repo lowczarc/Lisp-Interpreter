@@ -19,7 +19,7 @@ pub fn get_value(context: &mut Context, literal: Slisp) -> Slisp {
     match literal {
         Slisp::Atom(s) => {
             if let Ok(x) = s.parse::<i32>() {
-                Slisp::Numeric(x).into()
+                Slisp::Numeric(x)
             } else if let Some(value) = context.get(&s) {
                 value.clone()
             } else {

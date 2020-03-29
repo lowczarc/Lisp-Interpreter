@@ -4,7 +4,7 @@ use std::rc::Rc;
 pub fn lambda(_context: &mut Context, args: Vec<Slisp>) -> Slisp {
     let mut arguments = args.into_iter();
 
-    let lambda_var = if let Slisp::Atom(s) = arguments
+    let lambda_arg = if let Slisp::Atom(s) = arguments
         .next()
         .expect("Wrong number of arguments in lambda definition")
     {
@@ -12,7 +12,7 @@ pub fn lambda(_context: &mut Context, args: Vec<Slisp>) -> Slisp {
     } else {
         panic!("Lambda var must be an atom")
     };
-    let func_def = arguments
+    let lambda_body = arguments
         .next()
         .expect("Wrong number of arguments in lambda definition");
 
@@ -27,10 +27,10 @@ pub fn lambda(_context: &mut Context, args: Vec<Slisp>) -> Slisp {
                     .expect("Wrong number of arguments in lambda call"),
             );
 
-            let tmp = context.remove(&lambda_var);
-            context.insert(lambda_var.clone(), arg);
+            let tmp = context.remove(&lambda_arg);
+            context.insert(lambda_arg.clone(), arg);
 
-            let mut result = get_value(context, func_def.clone());
+            let mut result = get_value(context, lambda_body.clone());
 
             if let Slisp::Func(f) = &result {
                 let args: Vec<Slisp> = arguments.collect();
@@ -39,10 +39,10 @@ pub fn lambda(_context: &mut Context, args: Vec<Slisp>) -> Slisp {
                 }
             }
 
-            context.remove(&lambda_var);
+            context.remove(&lambda_arg);
 
             if let Some(tmp_var) = tmp {
-                context.insert(lambda_var.clone(), tmp_var);
+                context.insert(lambda_arg.clone(), tmp_var);
             }
             result
         },

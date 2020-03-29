@@ -106,9 +106,14 @@ pub fn execute(program: String) {
         String::from("pop"),
         Slisp::Func(LispFunction(Rc::new(Box::new(functions::pop)))),
     );
+    let lambda = Slisp::Func(LispFunction(Rc::new(Box::new(functions::lambda))));
+    context.insert(
+        String::from("lambda"),
+        lambda.clone(),
+    );
     context.insert(
         String::from("λ"),
-        Slisp::Func(LispFunction(Rc::new(Box::new(functions::lambda)))),
+        lambda,
     );
     context.insert(
         String::from("def"),

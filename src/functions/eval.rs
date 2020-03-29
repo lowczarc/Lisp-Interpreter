@@ -6,13 +6,11 @@ pub fn eval(context: &mut Context, program: Vec<Slisp>) -> Slisp {
     let arguments: Vec<Slisp> = args.collect();
 
     if let Some(Slisp::Atom(name)) = function_name {
-        let function = if let Some(Slisp::Func(function)) = context.remove(&name.to_string()) {
-            function.0
+        let function = if let Some(Slisp::Func(function)) = context.get(&name) {
+            function.0.clone()
         } else {
             panic!(format!("No function named {} in the context", name));
         };
-
-        context.insert(name, Slisp::Func(LispFunction(function.clone())));
 
         function(context, arguments)
     } else if let Some(Slisp::List(subelem)) = function_name {
@@ -22,6 +20,6 @@ pub fn eval(context: &mut Context, program: Vec<Slisp>) -> Slisp {
             panic!("Only function are callables");
         }
     } else {
-        panic!("Empty function call: {:?}", function_name);
+        panic!("Invalid function call: {:?}", function_name);
     }
 }
