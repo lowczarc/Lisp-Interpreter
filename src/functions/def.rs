@@ -15,7 +15,7 @@ pub fn def(context: &mut Context, args: Vec<Slisp>) -> Slisp {
         arguments.next().expect("Wrong number of arguments in def"),
     );
 
-    context.insert(name_var, var);
+    context.add_to_global(name_var, var);
 
     Slisp::None
 }

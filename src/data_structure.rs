@@ -1,7 +1,43 @@
 use crate::functions::eval;
 use std::{collections::HashMap, fmt, rc::Rc};
 
-pub type Context = HashMap<String, Slisp>;
+#[derive(Debug)]
+pub struct Context {
+    global: HashMap<String, Slisp>,
+    scope: HashMap<String, Slisp>,
+}
+
+impl Context {
+    pub fn new() -> Self {
+        Self {
+            global: HashMap::new(),
+            scope: HashMap::new(),
+        }
+    }
+
+    pub fn clone_with_custom_scope(&self, scope: HashMap<String, Slisp>) -> Self {
+        Self {
+            global: self.global.clone(),
+            scope,
+        }
+    }
+
+    pub fn get_scope(&self) -> &HashMap<String, Slisp> {
+        &self.scope
+    }
+
+    pub fn add_to_global(&mut self, key: String, value: Slisp) {
+        self.global.insert(key, value);
+    }
+
+    pub fn add_to_scope(&mut self, key: String, value: Slisp) {
+        self.scope.insert(key, value);
+    }
+
+    pub fn get(&self, key: &str) -> Option<&Slisp> {
+        self.scope.get(key).or_else(|| self.global.get(key))
+    }
+}
 
 #[derive(Clone)]
 pub struct LispFunction(pub Rc<Box<dyn Fn(&mut Context, Vec<Slisp>) -> Slisp>>);

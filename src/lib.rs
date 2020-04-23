@@ -1,4 +1,4 @@
-use std::{collections::HashMap, rc::Rc, str::Chars};
+use std::{rc::Rc, str::Chars};
 
 mod data_structure;
 mod functions;
@@ -48,79 +48,73 @@ fn parse_lisp(program: &mut Chars) -> Vec<Slisp> {
 }
 
 pub fn execute(program: String) {
-    let mut context = HashMap::new();
+    let mut context = Context::new();
 
-    context.insert(
+    context.add_to_global(
         String::from("+"),
         Slisp::Func(LispFunction(Rc::new(Box::new(functions::add)))),
     );
-    context.insert(
+    context.add_to_global(
         String::from("-"),
         Slisp::Func(LispFunction(Rc::new(Box::new(functions::sub)))),
     );
-    context.insert(
+    context.add_to_global(
         String::from("*"),
         Slisp::Func(LispFunction(Rc::new(Box::new(functions::mul)))),
     );
-    context.insert(
+    context.add_to_global(
         String::from("/"),
         Slisp::Func(LispFunction(Rc::new(Box::new(functions::div)))),
     );
-    context.insert(
+    context.add_to_global(
         String::from("="),
         Slisp::Func(LispFunction(Rc::new(Box::new(functions::equal)))),
     );
-    context.insert(
+    context.add_to_global(
         String::from(">"),
         Slisp::Func(LispFunction(Rc::new(Box::new(functions::greater)))),
     );
-    context.insert(
+    context.add_to_global(
         String::from("<"),
         Slisp::Func(LispFunction(Rc::new(Box::new(functions::lower)))),
     );
-    context.insert(
+    context.add_to_global(
         String::from("if"),
         Slisp::Func(LispFunction(Rc::new(Box::new(functions::if_else)))),
     );
-    context.insert(
+    context.add_to_global(
         String::from("print"),
         Slisp::Func(LispFunction(Rc::new(Box::new(functions::print)))),
     );
-    context.insert(
+    context.add_to_global(
         String::from("list"),
         Slisp::Func(LispFunction(Rc::new(Box::new(functions::list)))),
     );
-    context.insert(
+    context.add_to_global(
         String::from("len"),
         Slisp::Func(LispFunction(Rc::new(Box::new(functions::len)))),
     );
-    context.insert(
+    context.add_to_global(
         String::from("last"),
         Slisp::Func(LispFunction(Rc::new(Box::new(functions::last)))),
     );
-    context.insert(
+    context.add_to_global(
         String::from("push"),
         Slisp::Func(LispFunction(Rc::new(Box::new(functions::push)))),
     );
-    context.insert(
+    context.add_to_global(
         String::from("pop"),
         Slisp::Func(LispFunction(Rc::new(Box::new(functions::pop)))),
     );
     let lambda = Slisp::Func(LispFunction(Rc::new(Box::new(functions::lambda))));
-    context.insert(
-        String::from("lambda"),
-        lambda.clone(),
-    );
-    context.insert(
-        String::from("λ"),
-        lambda,
-    );
-    context.insert(
+    context.add_to_global(String::from("lambda"), lambda.clone());
+    context.add_to_global(String::from("λ"), lambda);
+    context.add_to_global(
         String::from("def"),
         Slisp::Func(LispFunction(Rc::new(Box::new(functions::def)))),
     );
 
-    context.insert(String::from("nil"), Slisp::None);
+    context.add_to_global(String::from("nil"), Slisp::None);
 
     let mut chars = program.chars();
 
@@ -154,7 +148,7 @@ mod wasm {
     #[no_mangle]
     pub extern "C" fn execute_bytes_array(ptr: *const u8, len: usize) {
         let input = unsafe { std::slice::from_raw_parts(ptr, len) };
-    
+
         std::panic::set_hook(Box::new(|panic_info| {
             if let Some(message) = panic_info.payload().downcast_ref::<String>() {
                 console_log(&format!("Panic occurred: {}", &message));
@@ -167,15 +161,14 @@ mod wasm {
                 .expect("execute_bytes_array: Input must be a valid UTF-8 value"),
         );
     }
-    
+
     #[no_mangle]
     pub extern "C" fn allocateUint8Array(len: usize) -> *const u8 {
         let buffer = Vec::with_capacity(len);
         let ptr = buffer.as_ptr();
-    
+
         std::mem::forget(buffer);
-    
+
         ptr
     }
 }
-
