@@ -29,16 +29,16 @@ pub fn lambda(context: &mut Context, args: Vec<Slisp>) -> Slisp {
                     .expect("Wrong number of arguments in lambda call"),
             );
 
-            let mut context = context.clone_with_custom_scope(scope.clone());
+            let mut internal_context = context.clone_with_custom_scope(scope.clone());
 
-            context.add_to_scope(lambda_arg.clone(), arg);
+            internal_context.add_to_scope(lambda_arg.clone(), arg);
 
-            let mut result = get_value(&mut context, lambda_body.clone());
+            let mut result = get_value(&mut internal_context, lambda_body.clone());
 
             if let Slisp::Func(f) = &result {
                 let args: Vec<Slisp> = arguments.collect();
                 if args.len() > 0 {
-                    result = f.0(&mut context, args);
+                    result = f.0(context, args);
                 }
             }
 
