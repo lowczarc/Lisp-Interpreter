@@ -79,6 +79,34 @@ pub fn execute(program: String) {
         Slisp::Func(LispFunction(Rc::new(Box::new(functions::lower)))),
     );
     context.add_to_global(
+        String::from("+."),
+        Slisp::Func(LispFunction(Rc::new(Box::new(functions::fadd)))),
+    );
+    context.add_to_global(
+        String::from("-."),
+        Slisp::Func(LispFunction(Rc::new(Box::new(functions::fsub)))),
+    );
+    context.add_to_global(
+        String::from("*."),
+        Slisp::Func(LispFunction(Rc::new(Box::new(functions::fmul)))),
+    );
+    context.add_to_global(
+        String::from("/."),
+        Slisp::Func(LispFunction(Rc::new(Box::new(functions::fdiv)))),
+    );
+    context.add_to_global(
+        String::from("=."),
+        Slisp::Func(LispFunction(Rc::new(Box::new(functions::fequal)))),
+    );
+    context.add_to_global(
+        String::from(">."),
+        Slisp::Func(LispFunction(Rc::new(Box::new(functions::fgreater)))),
+    );
+    context.add_to_global(
+        String::from("<."),
+        Slisp::Func(LispFunction(Rc::new(Box::new(functions::flower)))),
+    );
+    context.add_to_global(
         String::from("if"),
         Slisp::Func(LispFunction(Rc::new(Box::new(functions::if_else)))),
     );

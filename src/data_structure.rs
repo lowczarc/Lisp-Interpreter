@@ -46,6 +46,7 @@ pub struct LispFunction(pub Rc<Box<dyn Fn(&mut Context, Vec<Slisp>) -> Slisp>>);
 pub enum Slisp {
     Func(LispFunction),
     Numeric(i32),
+    Float(f64),
     Atom(String),
     List(Vec<Slisp>),
     None,
@@ -56,6 +57,8 @@ pub fn get_value(context: &mut Context, literal: Slisp) -> Slisp {
         Slisp::Atom(s) => {
             if let Ok(x) = s.parse::<i32>() {
                 Slisp::Numeric(x)
+            } else if let Ok(x) = s.parse::<f64>() {
+                Slisp::Float(x)
             } else if let Some(value) = context.get(&s) {
                 value.clone()
             } else {
@@ -72,6 +75,7 @@ impl fmt::Debug for Slisp {
         match self {
             Slisp::Func(_) => f.write_str("Slisp::Func(#Func#)"),
             Slisp::Numeric(n) => f.write_str(&format!("Slisp::Numeric({})", n)),
+            Slisp::Float(n) => f.write_str(&format!("Slisp::Float({})", n)),
             Slisp::Atom(s) => f.write_str(&format!("Slisp::Atom({})", s)),
             Slisp::List(v) => f.write_str(&format!("Slisp::List({:?})", v)),
             Slisp::None => f.write_str("Slisp::None"),
@@ -84,6 +88,7 @@ impl fmt::Display for Slisp {
         match self {
             Slisp::Func(_) => f.write_str(&format!("#Func#")),
             Slisp::Numeric(n) => f.write_str(&format!("{}", n)),
+            Slisp::Float(n) => f.write_str(&format!("{}", n)),
             Slisp::Atom(s) => f.write_str(&format!("{}", s)),
             Slisp::List(l) => f.write_str(&format!(
                 "({})",
