@@ -1,11 +1,11 @@
 use std::{rc::Rc, str::Chars};
 
 mod data_structure;
-mod functions;
+pub mod functions;
 
-use data_structure::*;
+pub use data_structure::*;
 
-fn parse_lisp(program: &mut Chars) -> Vec<Slisp> {
+pub fn parse_lisp(program: &mut Chars) -> Vec<Slisp> {
     let mut current_arg = String::new();
     let mut args = Vec::new();
     let mut quote = false;
